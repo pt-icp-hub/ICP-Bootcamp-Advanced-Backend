@@ -4,14 +4,42 @@ Welcome to the **Internet Computer Protocol (ICP) Bootcamp - Advanced Backend**!
 
 ## 📜 Table of Contents
 
-- [📖 Learning Modules](#-learning-modules)
 - [🎯 Advanced Challenges](#-advanced-challenges)
+- [📖 Learning Outcomes](#-learning-outcomes)
 - [🔗 Resources & Documentation](#-resources--documentation)
 - [📩 Submit Your Project!](#-submit-your-project)
 
 ---
 
-## 📖 Learning Modules
+## 🎯 Advanced Challenges
+
+### ✅ **Challenge 1: Build an Authenticated Backend Using Internet Identity**
+
+- How to use Internet Identity on Candid UI
+- Restrict canister actions based on **authenticated users**
+- Store and manage **user admins**
+
+### ✅ **Challenge 2: Use HTTP Outcalls to Fetch an API and Store Data in a Canister**
+
+- Call an **external API** using HTTP Outcalls
+- Implement JSON parsing and a sorting algorithm
+- Store the API response in the **canister** and associated with the user.
+
+### ✅ **Challenge 3: Implement Inter-Canister Communication** (WIP)
+
+- Deploy two separate **canisters**
+- Implement **data exchange** between them
+- Optimize for **performance & efficiency**
+
+### ✅ **Challenge 4: Set Up a CICD Pipeline for Automated Testing & Deployment** (WIP)
+
+- Configure **GitHub Actions** for automated deployment
+- Run **unit tests** before deploying
+- Automate **canister upgrades & monitoring**
+
+---
+
+## 📖 Learning Outcomes
 
 ### 🔐 **Authentication with Identity Kit**
 
@@ -93,34 +121,6 @@ dfx canister logs <your_canister>
 - What are **canister factories**?
 - When to use **factory patterns** in ICP
 - Example: **Dynamic creation of canisters**
-
----
-
-## 🎯 Advanced Challenges
-
-### ✅ **Challenge 1: Build an Authenticated Backend Using Internet Identity**
-
-- How to use Internet Identity on Candid UI
-- Restrict canister actions based on **authenticated users**
-- Store and manage **user admins**
-
-### ✅ **Challenge 2: Use HTTP Outcalls to Fetch an API and Store Data in a Canister**
-
-- Call an **external API** using HTTP Outcalls
-- Implement JSON parsing and a sorting algorithm
-- Store the API response in the **canister** and associated with the user.
-
-### ✅ **Challenge 3: Implement Inter-Canister Communication** (WIP)
-
-- Deploy two separate **canisters**
-- Implement **data exchange** between them
-- Optimize for **performance & efficiency**
-
-### ✅ **Challenge 4: Set Up a CICD Pipeline for Automated Testing & Deployment** (WIP)
-
-- Configure **GitHub Actions** for automated deployment
-- Run **unit tests** before deploying
-- Automate **canister upgrades & monitoring**
 
 ---
 
