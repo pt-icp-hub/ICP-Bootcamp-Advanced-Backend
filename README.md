@@ -5,6 +5,7 @@ Welcome to the **Internet Computer Protocol (ICP) Bootcamp - Advanced Backend**!
 ## 📜 Table of Contents
 
 - [🎯 Advanced Challenges](#-advanced-challenges)
+- [💡 Freedom to Innovate](#-freedom-to-innovate)
 - [📖 Learning Outcomes](#-learning-outcomes)
 - [🔗 Resources & Documentation](#-resources--documentation)
 - [📩 Submit Your Project!](#-submit-your-project)
@@ -47,14 +48,14 @@ Unlike the beginner challenge, the Advanced Backend Challenge gives you more fre
 
 Create a small backend project that showcases unique features from ICP canisters. For example, you can:
 
-**Generate a Random Number**:
-Create a function that calls a function from the management canister to generate a random number.
+- **Generate a Random Number**:
+  Create a function that calls a function from the management canister to generate a random number.
 
-**Search for a Proposal**:
-Create another function that performs an HTTP outcall to the ICP API to search for a proposal number. Then, use a transform method to return the status and body of the response.
+- **Search for a Proposal**:
+  Create another function that performs an HTTP outcall to the ICP API to search for a proposal number. Then, use a transform method to return the status and body of the response.
 
-**Automate with Timers**:
-Use the Timer datatype to call these two functions every 30 seconds.
+- **Automate with Timers**:
+  Use the Timer datatype to call these two functions every 30 seconds.
 
 This project idea leverages inter-canister communication, HTTP outcalls, and timers. They are unique capabilities of ICP that empower you to build truly decentralized backend applications.
 
