@@ -14,58 +14,81 @@ Welcome to the **Internet Computer Protocol (ICP) Bootcamp - Advanced Backend**!
 
 ## 🎯 Advanced Challenges
 
+Please choose 3 out of 5 that interest you most.
+
 ### ✅ **Challenge 1: Build an Authenticated Backend Using Internet Identity**
 
 - How to use Internet Identity on Candid UI
 - Restrict canister actions based on **authenticated users**
 - Store and manage **user admins**
 
-### ✅ **Challenge 2: Use HTTP Outcalls to Fetch an API and Store Data in a Canister**
+#### 💡 Tips
+- For you to use Internet Identity on Candid UI, you need to add the url path to it on the ii query param, like "http://127...cai&ii=http://be2us-64aaa-aaaaa-qaabq-cai.localhost:4943/". Where the "be2us...cai" is the canister id of your local Internet Identity.
+
+### ✅ **Challenge 2: Use HTTP Outcalls to fetch an API result**
 
 - Call an **external API** using HTTP Outcalls
-- Implement JSON parsing and a sorting algorithm
-- Store the API response in the **canister** and associated with the user.
+- Implement JSON parsing
+- Return API response
 
-### ✅ **Challenge 3: Implement Inter-Canister Communication** (WIP)
+#### 💡 Tips
+- Ask AI to generate an HTTP request example for you
+- Check the specific documentation at: 
+  - [Intro to HTTP Outcalls](https://internetcomputer.org/docs/current/developer-docs/smart-contracts/advanced-features/https-outcalls/https-outcalls-how-to-use)
+  - [Example of GET call](https://internetcomputer.org/docs/current/developer-docs/smart-contracts/advanced-features/https-outcalls/https-outcalls-get)
 
-- Deploy two separate **canisters**
-- Implement **data exchange** between them
-- Optimize for **performance & efficiency**
 
-### ✅ **Challenge 4: Set Up a CICD Pipeline for Automated Testing & Deployment** (WIP)
+### ✅ **Challenge 3: Implement Inter-Canister Communication**
 
-- Configure **GitHub Actions** for automated deployment
-- Run **unit tests** before deploying
-- Automate **canister upgrades & monitoring**
+- Deploy two separate **canisters** or a bucket canister (see example at composable queries below)
+- Do several calls between them, especially **composable queries**
+- Call a canister **outside your project** (but still inside localhost)
+- Call **Management Canister** to know which principal controls your canister, or how much memory left you still have.
+
+#### 💡 Tips
+- https://internetcomputer.org/docs/current/developer-docs/smart-contracts/advanced-features/composite-query
+- Ask AI how to call a canister by ID in Motoko
+- Ask AI for an example of Management Canister call to check the controllers of my actor (canister)
+
+### ✅ **Challenge 4: Implement Timers**
+
+- create a "job" method (meant to be called by the Timer);
+- create a **"cron"** job that runs "every 1h".
+- create a **"queued"** job that you set to run in "1 min".
+
+#### 💡 Tips
+-  Check docs about what are [Timers](https://internetcomputer.org/docs/current/developer-docs/smart-contracts/advanced-features/periodic-tasks/)
+-  And how to implement them in [Motoko](https://internetcomputer.org/docs/current/motoko/main/writing-motoko/timers)
+
+### ✅ **Challenge 5: Set Up a CICD Pipeline (with Testing and Linting) and Monitoring**
+
+- Add **tests** to your repo (suggest Mops Test with PocketIC as param)
+- Run tests, format lint and audits on **github workflow (Action)**
+- Deploy on mainnet (ask Tiago for Faucet Coupon) and:
+  - Implement monitoring with CycleOps
+  - Cause a trap and then see it in the logs (and also query stats)
+ 
+#### 💡 Tips
+- Understand about [Mops Test](https://mops.one/test) and how its using already Pocket IC (see [docs](https://docs.mops.one/cli/mops-test))
+- See an example of a github workflow [here](https://github.com/obsidian-tears/obsidian_tears_frontend_backend/blob/main/.github/workflows/ci.yml)
+- Learn/claim your cycles with [Faucet Coupons](https://anv4y-qiaaa-aaaal-qaqxq-cai.ic0.app/)
+- Monitor your cycles at [CycleOps](https://cycleops.dev/)
+- Ask AI to explain about "dfx logs" and "dfx canister stats" (for stats on amount of query calls)
 
 ---
 
 ## 💡 Freedom to Innovate
 
-Unlike the beginner challenge, the Advanced Backend Challenge gives you more freedom on what you want to implement. You're encouraged to explore, innovate, and build unique backend solutions on ICP.
-
-### Project Idea:
-
-Create a small backend project that showcases unique features from ICP canisters. For example, you can:
-
-- **Generate a Random Number**:
-  Create a function that calls a function from the management canister to generate a random number.
-
-- **Search for a Proposal**:
-  Create another function that performs an HTTP outcall to the ICP API to search for a proposal number. Then, use a transform method to return the status and body of the response.
-
-- **Automate with Timers**:
-  Use the Timer datatype to call these two functions every 30 seconds.
-
-This project idea leverages inter-canister communication, HTTP outcalls, and timers. They are unique capabilities of ICP that empower you to build truly decentralized backend applications.
+Unlike the beginner challenge, the Advanced Backend Challenge gives you more freedom on how you want to implement. You're encouraged to explore, innovate, and build good backend solutions on ICP.
 
 ### 📝 Example Template Code
 
-The code provided in this repository is just an example template to help you get started. Feel free to modify, extend, or completely re-imagine it as you work on your advanced backend challenge. Use it as a reference while exploring the advanced features of ICP.
+The code provided in this repository already has a few methods to help you get started and guide on what is expected. Feel free to modify, extend, or completely re-imagine it as you work on your advanced backend challenge. Use it as a reference while exploring the advanced features of ICP.
 
 ### 💡 Do Your Own Research:
 
-Explore the links provided in this challenge to dive deeper into each topic. You can also see how we implemented the Internet Identity canister in the frontend of the beginner challenge for inspiration.
+Explore the links provided in this challenge to dive deeper into each topic.
+We strongly recommend asking the Internet Computer AI (https://internetcomputer.org/), before doing a Google Search or asking fellow devs.
 
 ---
 
@@ -75,7 +98,6 @@ Explore the links provided in this challenge to dive deeper into each topic. You
 
 - Understanding **HTTP outcalls** on ICP
 - How to request external data from an API
-- Storing API responses in a **canister**
 
 ### 🔗 **Inter-Canister Communication**
 
@@ -139,45 +161,6 @@ dfx canister logs <your_canister>
 - What are **canister factories**?
 - When to use **factory patterns** in ICP
 - Example: **Dynamic creation of canisters**
-
----
-
-## 🎯 Advanced Challenges
-
-Please choose 3 out of 5 that interest you most.
-
-### ✅ **Challenge 1: Build an Authenticated Backend Using Internet Identity**
-
-- How to use Internet Identity on Candid UI
-- Restrict canister actions based on **authenticated users**
-- Store and manage **user admins**
-
-### ✅ **Challenge 2: Use HTTP Outcalls to fetch an API result**
-
-- Call an **external API** using HTTP Outcalls
-- Implement JSON parsing
-- Return API response
-
-### ✅ **Challenge 3: Implement Inter-Canister Communication**
-
-- Deploy two separate **canisters**
-- Do several calls between them, especially **composable queries**
-- Call a canister **outside your project** (but still inside localhost)
-- Call **Management Canister**
-
-### ✅ **Challenge 4: Implement Timers**
-
-- create a "job" method (meant to be called by the Timer);
-- create a **"cron"** job that runs "every 1h".
-- create a **"queued"** job that you set to run in "1 min".
-
-### ✅ **Challenge 5: Set Up a CICD Pipeline (with Testing and Linting) and Monitoring**
-
-- Add **tests** to your repo (suggest Mops Test with PocketIC as param)
-- Run tests, format lint and audits on **github workflow (Action)**
-- Deploy on mainnet (ask Tiago for Faucet Coupon) and:
-  - Implement monitoring with CycleOps
-  - Cause a trap and then see it in the logs (and also query stats)
 
 ---
 
