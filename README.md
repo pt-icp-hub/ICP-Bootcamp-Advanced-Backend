@@ -82,12 +82,6 @@ dfx canister logs <your_canister>
 - Setting up **continuous integration (CI)**
 - Running **automated tests before deployment**
 
-### 🔑 **Secure Storage & Handling of Secrets**
-
-- Managing **API keys & sensitive data** securely
-- Using **encrypted storage** for secrets
-- Preventing **exposure of private information**
-
 ### 🏭 **Introduction to Canister Factories**
 
 - What are **canister factories**?
@@ -98,29 +92,40 @@ dfx canister logs <your_canister>
 
 ## 🎯 Advanced Challenges
 
+Please choose 3 out of 5 that interest you most.
+
 ### ✅ **Challenge 1: Build an Authenticated Backend Using Internet Identity**
 
 - How to use Internet Identity on Candid UI
 - Restrict canister actions based on **authenticated users**
 - Store and manage **user admins**
 
-### ✅ **Challenge 2: Use HTTP Outcalls to Fetch an API and Store Data in a Canister**
+### ✅ **Challenge 2: Use HTTP Outcalls to fetch an API result**
 
 - Call an **external API** using HTTP Outcalls
-- Implement JSON parsing and a sorting algorithm
-- Store the API response in the **canister** and associated with the user.
+- Implement JSON parsing
+- Return API response
 
-### ✅ **Challenge 3: Implement Inter-Canister Communication** (WIP)
+### ✅ **Challenge 3: Implement Inter-Canister Communication**
 
 - Deploy two separate **canisters**
-- Implement **data exchange** between them
-- Optimize for **performance & efficiency**
+- Do several calls between them, especially **composable queries**
+- Call a canister **outside your project** (but still inside localhost)
+- Call **Management Canister**
 
-### ✅ **Challenge 4: Set Up a CICD Pipeline for Automated Testing & Deployment** (WIP)
+### ✅ **Challenge 4: Implement Timers**
 
-- Configure **GitHub Actions** for automated deployment
-- Run **unit tests** before deploying
-- Automate **canister upgrades & monitoring**
+- create a "job" method (meant to be called by the Timer);
+- create a **"cron"** job that runs "every 1h".
+- create a **"queued"** job that you set to run in "1 min".
+
+### ✅ **Challenge 5: Set Up a CICD Pipeline (with Testing and Linting) and Monitoring**
+
+- Add **tests** to your repo (suggest Mops Test with PocketIC as param)
+- Run tests, format lint and audits on **github workflow (Action)**
+- Deploy on mainnet (ask Tiago for Faucet Coupon) and:
+  - Implement monitoring with CycleOps
+  - Cause a trap and then see it in the logs (and also query stats)
 
 ---
 
@@ -128,12 +133,9 @@ dfx canister logs <your_canister>
 
 📚 [Official ICP Docs](https://internetcomputer.org/docs)  
 📚 [Motoko Programming Guide](https://sdk.dfinity.org/docs/language-guide/motoko.html)  
-📚 [Motoko Bootcamp](https://www.motokobootcamp.com/)  
-📚 [Motoko Playground](https://m7sm4-2iaaa-aaaab-qabra-cai.raw.ic0.app/)  
+📚 [ICP Ninja](https://icp.ninja/)  
 📚 [ICP Best Practices](https://internetcomputer.org/docs/current/developer-docs/smart-contracts/best-practices/general/)  
 📚 [CycleOps Monitoring](https://cycleops.dev/)
-
-💡 **Tip**: Check out [ICPNinja](https://icp.ninja/) for hands-on practice.
 
 ---
 
