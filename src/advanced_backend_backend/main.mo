@@ -11,6 +11,7 @@ import Result "mo:base/Result";
 import Float "mo:base/Float";
 import { JSON } "mo:serde";
 import Debug "mo:base/Debug";
+import Error "mo:base/Error";
 
 // import the custom types we have in Types.mo
 import Types "types";
@@ -18,18 +19,36 @@ import Types "types";
 actor {
 
   // ==== CHALLENGE 1 ====
-  stable let adminsMap = Vector.init<Principal>(1, Principal.fromText("2vxsx-fae")); // feel free to change to your own principal instead of the anonymous one
+  stable let adminsMap = Vector.init<Principal>(1, Principal.fromText("skdcz-xid3o-nsvrx-gogyf-ix6jh-enkm6-44l25-2njsd-7d5zq-agste-jqe"));
 
-  public shared ({ caller }) func getAdmins() : async [Principal] {
+  private func isAdmin(principal : Principal) : Bool {
+    return Vector.contains(adminsMap, principal, Principal.equal);
+  };
+
+  public shared func getAdmins() : async [Principal] {
     return Vector.toArray(adminsMap);
   };
 
   public shared ({ caller }) func addAdmin(principal : Principal) : async Result.Result<Text, Text> {
 
+    if (not isAdmin(caller)) {
+      throw Error.reject("Caller " # debug_show caller # " is not an admin");
+    };
+
+    if (isAdmin(principal)) {
+      throw Error.reject("Principal " # debug_show principal # " is already an admin");
+    };
+
+    Vector.add(adminsMap, principal);
+
     return #ok("Admin " # debug_show principal # " added");
   };
 
   public shared ({ caller }) func callProtectedMethod() : async Result.Result<Text, Text> {
+
+    if (not isAdmin(caller)) {
+      throw Error.reject("Caller " # debug_show caller # " is not an admin");
+    };
 
     return #ok("Ups, this was meant to be protected");
   };
