@@ -9,9 +9,11 @@ import { phash; nhash } "mo:map/Map";
 import Vector "mo:vector";
 import Result "mo:base/Result";
 import Float "mo:base/Float";
-import { JSON } "mo:serde";
+import Serde "mo:serde";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
+import Array "mo:base/Array";
+import IC "ic:aaaaa-aa";
 
 // import the custom types we have in Types.mo
 import Types "types";
@@ -55,29 +57,116 @@ actor {
 
   // ==== CHALLENGE 2 ====
 
+  private type Sentiment = {
+    name : Text;
+    score : Float;
+  };
+
+  public query func transform({
+    context : Blob;
+    response : IC.http_request_result;
+  }) : async IC.http_request_result {
+    {
+      response with headers = [];
+    };
+  };
+
+  private func sendRequest(
+    headers : [{ name : Text; value : Text }],
+    body_json : Text,
+    url : Text) : async IC.http_request_result {
+    
+    let http_request : IC.http_request_args = {
+      url = url;
+      max_response_bytes = null;
+      headers = headers;
+      body = ?Text.encodeUtf8(body_json);
+      method = #post;
+      transform = ?{
+        function = transform;
+        context = Blob.fromArray([]);
+      };
+    };
+
+    Cycles.add<system>(230_850_258_000); // Necessary cycles for http outcall
+
+    return await IC.http_request(http_request);
+};
+
   public func outcall_ai_model_for_sentiment_analysis(paragraph : Text) : async Result.Result<{ paragraph : Text; result : Text }, Text> {
-    // important vars and credentials
-    // let host : Text = "api-inference.huggingface.co";
-    // let url = "https://" # host # "/models/cardiffnlp/twitter-roberta-base-sentiment-latest";
-    // important headers:
-    // {
-    //    name = "Authorization";
-    //    value = "Bearer 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";
-    // }
-    // { name = "Content-Type"; value = "application/json" }
+    
+    let host : Text = "api-inference.huggingface.co";
+    let url = "https://" # host # "/models/cardiffnlp/twitter-roberta-base-sentiment-latest";
+    
+    let request_headers = [
+      { name = "Authorization"; value = "Bearer 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" },
+      { name = "Content-Type"; value = "application/json" }
+    ];
 
-    // let request_body_json : Text = "{ \"inputs\" : \" " # paragraph # "\" }";
-    // let request_body_as_Blob : Blob = Text.encodeUtf8(request_body_json);
-    // let request_body_as_nat8 : [Nat8] = Blob.toArray(request_body_as_Blob);
+    let request_body_json : Text = "{ \"inputs\" : \"" # paragraph # "\" }";
 
-    // use Serde package to decode the JSON response
+    var response = await sendRequest(request_headers, request_body_json, url);
 
-    let api_result : Text = "maybe positive, unless it's negative";
-
-    return #ok({
-      paragraph = paragraph;
-      result = api_result;
-    });
+    if (response.status == 503) {
+      Debug.print("Retry with \"x-wait-for-model\" header, due to 503 response");
+      let request_headers_with_wait = Array.append(request_headers, [{ name = "x-wait-for-model"; value = "true" }]);
+      response := await sendRequest(request_headers_with_wait, request_body_json, url);
+    };
+    
+    switch (Text.decodeUtf8(response.body)) {
+      case (?decodedText) { 
+        let options: Serde.Options = {
+          blob_contains_only_values = true;
+          use_icrc_3_value_type = false;
+          renameKeys = [("label", "name")];
+          types = null;
+        };
+        switch (Serde.JSON.fromText(decodedText, ?options)) {
+          case (#ok(blob)) {
+            var sentiments : ?[[Sentiment]] = from_candid(blob);
+            var highestSentiment : ?Sentiment = null;
+            switch (sentiments) {
+              case (?sentimentArray) {
+                if (sentimentArray.size() > 0) {
+                  for (sentiment in sentimentArray[0].vals()) {
+                    switch (highestSentiment) {
+                      case (?currentHighest) {
+                        if (sentiment.score > currentHighest.score) {
+                          highestSentiment := ?sentiment;
+                        };
+                      };
+                      case (_) {
+                        highestSentiment := ?sentiment;
+                      };
+                    };
+                  };
+                }
+              };
+              case (_) {
+                throw Error.reject("Failed to parse response: " # decodedText);
+              };
+            };
+            return #ok({
+              paragraph = paragraph;
+              result = switch (highestSentiment) {
+                case (?sentiment) {
+                  "Sentiment is " # sentiment.name # ", with score " # debug_show sentiment.score;
+                };
+                case (_) {
+                  "No sentiment";
+                };
+              };
+            });
+          };
+          case (#err(error)) {
+            throw Error.reject("Failed to parse JSON: " # error);
+          };
+        };
+       };
+       case (_) { 
+        throw Error.reject("Failed to decode HTTP outcall response");
+      };
+    };
   };
 
   // ==== CHALLENGE 3 ====
