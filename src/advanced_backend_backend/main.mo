@@ -72,7 +72,7 @@ actor {
   };
 
   private func sendRequest(
-    headers : [{ name : Text; value : Text }],
+    headers : [Types.HttpHeader],
     body_json : Text,
     url : Text) : async IC.http_request_result {
     
@@ -91,7 +91,7 @@ actor {
     Cycles.add<system>(230_850_258_000); // Necessary cycles for http outcall
 
     return await IC.http_request(http_request);
-};
+  };
 
   public func outcall_ai_model_for_sentiment_analysis(paragraph : Text) : async Result.Result<{ paragraph : Text; result : Text }, Text> {
     
