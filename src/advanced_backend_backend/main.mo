@@ -34,11 +34,11 @@ actor {
   public shared ({ caller }) func addAdmin(principal : Principal) : async Result.Result<Text, Text> {
 
     if (not isAdmin(caller)) {
-      throw Error.reject("Caller " # debug_show caller # " is not an admin");
+      return #err("Caller " # debug_show caller # " is not an admin");
     };
 
     if (isAdmin(principal)) {
-      throw Error.reject("Principal " # debug_show principal # " is already an admin");
+      return #err("Principal " # debug_show principal # " is already an admin");
     };
 
     Vector.add(adminsMap, principal);
@@ -49,7 +49,7 @@ actor {
   public shared query ({ caller }) func callProtectedMethod() : async Result.Result<Text, Text> {
 
     if (not isAdmin(caller)) {
-      throw Error.reject("Caller " # debug_show caller # " is not an admin");
+      return #err("Caller " # debug_show caller # " is not an admin");
     };
 
     return #ok("Ups, this was meant to be protected");
@@ -143,7 +143,7 @@ actor {
                 }
               };
               case (_) {
-                throw Error.reject("Failed to parse response: " # decodedText);
+                return #err("Failed to parse response: " # decodedText);
               };
             };
             return #ok({
@@ -159,12 +159,12 @@ actor {
             });
           };
           case (#err(error)) {
-            throw Error.reject("Failed to parse JSON: " # error);
+            return #err("Failed to parse JSON: " # error);
           };
         };
        };
        case (_) { 
-        throw Error.reject("Failed to decode HTTP outcall response");
+        return #err("Failed to decode HTTP outcall response");
       };
     };
   };
