@@ -13,10 +13,10 @@ import Serde "mo:serde";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Array "mo:base/Array";
+import Bool "mo:base/Bool";
 import IC "ic:aaaaa-aa";
-
-// import the custom types we have in Types.mo
 import Types "types";
+import Other "canister:other_backend";
 
 actor {
 
@@ -27,7 +27,7 @@ actor {
     return Vector.contains(adminsMap, principal, Principal.equal);
   };
 
-  public shared func getAdmins() : async [Principal] {
+  public shared query func getAdmins() : async [Principal] {
     return Vector.toArray(adminsMap);
   };
 
@@ -46,7 +46,7 @@ actor {
     return #ok("Admin " # debug_show principal # " added");
   };
 
-  public shared ({ caller }) func callProtectedMethod() : async Result.Result<Text, Text> {
+  public shared query ({ caller }) func callProtectedMethod() : async Result.Result<Text, Text> {
 
     if (not isAdmin(caller)) {
       throw Error.reject("Caller " # debug_show caller # " is not an admin");
@@ -171,8 +171,13 @@ actor {
 
   // ==== CHALLENGE 3 ====
 
-  public func callOtherCanister() : async Result.Result<Text, Text> {
-    return #ok("Not Implemented");
+  public func callOtherCanister(shouldFail : Bool) : async Result.Result<Text, Text> {
+    try {
+      let response = await Other.doNothingSpecial(shouldFail);
+      return #ok(response);
+    } catch (error) {
+      return #err("Error calling Other.doNothingSpecial: code=" # debug_show(Error.code(error)) # " message=" # Error.message(error));
+    };
   };
 
   public func callOutsideCanister() : async Result.Result<Text, Text> {
