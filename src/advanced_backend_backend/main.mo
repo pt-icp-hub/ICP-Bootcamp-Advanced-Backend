@@ -15,6 +15,7 @@ import Error "mo:base/Error";
 import Array "mo:base/Array";
 import Bool "mo:base/Bool";
 import IC "ic:aaaaa-aa";
+import IC_EXP "mo:base/ExperimentalInternetComputer";
 import Types "types";
 import Other "canister:other_backend";
 
@@ -180,8 +181,22 @@ actor {
     };
   };
 
-  public func callOutsideCanister() : async Result.Result<Text, Text> {
-    return #ok("Not Implemented");
+  public func callOutsideCanister(canisterId : Principal) : async Result.Result<Text, Text> {
+    let functionName = "icrc1_name";
+    try {
+      let encodedValue = await IC_EXP.call(canisterId, functionName, to_candid(()));
+      let value : ?Text = from_candid(encodedValue);
+      switch (value) {
+        case (?icrc1_name) {
+          return #ok(icrc1_name);
+        };
+        case (_) {
+          throw Error.reject("Failed to decode response " # debug_show(encodedValue));
+        };
+      }
+    } catch (error) {
+      return #err("Error calling " # functionName # " on canister " # debug_show(canisterId) # ": code=" # debug_show(Error.code(error)) # " message=" # Error.message(error));
+    };
   };
 
   public func callManagementCanister() : async Result.Result<Text, Text> {
