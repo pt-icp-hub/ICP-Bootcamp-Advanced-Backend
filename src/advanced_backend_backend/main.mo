@@ -19,7 +19,7 @@ import IC_EXP "mo:base/ExperimentalInternetComputer";
 import Types "types";
 import Other "canister:other_backend";
 
-actor {
+actor Advanced {
 
   // ==== CHALLENGE 1 ====
   stable let adminsMap = Vector.init<Principal>(1, Principal.fromText("skdcz-xid3o-nsvrx-gogyf-ix6jh-enkm6-44l25-2njsd-7d5zq-agste-jqe"));
@@ -181,6 +181,12 @@ actor {
     };
   };
 
+  /**
+   * Calls the "icrc1_name" function on an external canister.
+   *
+   * @param {Principal} canisterId - The principal ID of the ICRC1 canister to call.
+   * @return {async Result.Result<Text, Text>} - A Result containing either the ICRC1 name or an error.
+   */
   public func callOutsideCanister(canisterId : Principal) : async Result.Result<Text, Text> {
     let functionName = "icrc1_name";
     try {
@@ -199,8 +205,33 @@ actor {
     };
   };
 
-  public func callManagementCanister() : async Result.Result<Text, Text> {
-    return #ok("Not Implemented");
+  public func callManagementCanister() : async Result.Result<{
+    controllers : [Principal];
+    status : {
+      #stopped;
+      #stopping;
+      #running;
+    };
+    memory_size : Nat;
+    cycles : Nat
+  }, Text> {
+    try {
+      let canisterInfo : IC.canister_info_result = await IC.canister_info({
+        canister_id = Principal.fromActor(Advanced);
+        num_requested_changes = ?1;
+      });
+      let canisterStatus : IC.canister_status_result = await IC.canister_status({
+        canister_id = Principal.fromActor(Advanced);
+      });
+      return #ok({
+        controllers = canisterInfo.controllers;
+        status = canisterStatus.status;
+        memory_size = canisterStatus.memory_size;
+        cycles = canisterStatus.cycles;
+      });
+    } catch (error) {
+      return #err("Error calling management canister: code=" # debug_show(Error.code(error)) # " message=" # Error.message(error));
+    };
   };
 
   // ==== CHALLENGE 4 ====
