@@ -172,7 +172,7 @@ actor Advanced {
 
   // ==== CHALLENGE 3 ====
 
-  public func callOtherCanister(shouldFail : Bool) : async Result.Result<Text, Text> {
+  public composite query func callOtherCanister(shouldFail : Bool) : async Result.Result<Text, Text> {
     try {
       let response = await Other.doNothingSpecial(shouldFail);
       return #ok(response);
@@ -181,13 +181,24 @@ actor Advanced {
     };
   };
 
+  public func callOutsideCanister() : async Result.Result<Text, Text> {
+    try {
+      let outSideCanister = actor("bw4dl-smaaa-aaaaa-qaacq-cai"): actor { greet(name : Text) : async Text };
+      let response = await outSideCanister.greet("Alice");
+      return #ok(response);
+    } catch (error) {
+      return #err("Error calling outSideCanister.greet: code=" # debug_show(Error.code(error)) # " message=" # Error.message(error));
+    };
+  };
+
   /**
    * Calls the "icrc1_name" function on an external canister.
+   * Can only work on Playground or Mainnet.
    *
    * @param {Principal} canisterId - The principal ID of the ICRC1 canister to call.
    * @return {async Result.Result<Text, Text>} - A Result containing either the ICRC1 name or an error.
    */
-  public func callOutsideCanister(canisterId : Principal) : async Result.Result<Text, Text> {
+  public func callOutsideCanisterWithId(canisterId : Principal) : async Result.Result<Text, Text> {
     let functionName = "icrc1_name";
     try {
       let encodedValue = await IC_EXP.call(canisterId, functionName, to_candid(()));
