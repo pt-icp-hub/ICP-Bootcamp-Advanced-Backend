@@ -16,8 +16,13 @@ import Array "mo:base/Array";
 import Bool "mo:base/Bool";
 import IC "ic:aaaaa-aa";
 import IC_EXP "mo:base/ExperimentalInternetComputer";
+import Char "mo:base/Char";
+import Nat32 "mo:base/Nat32";
+import Int64 "mo:base/Int64";
+import Type "mo:candid/Type";
 import Types "types";
 import Other "canister:other_backend";
+import { n64hash } "mo:map/Map";
 
 actor Advanced {
 
@@ -74,15 +79,16 @@ actor Advanced {
 
   private func sendRequest(
     headers : [Types.HttpHeader],
-    body_json : Text,
+    body_json : ?Text,
+    method: Types.HttpMethod,
     url : Text) : async IC.http_request_result {
     
     let http_request : IC.http_request_args = {
       url = url;
       max_response_bytes = null;
       headers = headers;
-      body = ?Text.encodeUtf8(body_json);
-      method = #post;
+      body = switch (body_json) { case (?json) { ?Text.encodeUtf8(json) }; case(_) { null }; };
+      method = method;
       transform = ?{
         function = transform;
         context = Blob.fromArray([]);
@@ -106,12 +112,12 @@ actor Advanced {
 
     let request_body_json : Text = "{ \"inputs\" : \"" # paragraph # "\" }";
 
-    var response = await sendRequest(request_headers, request_body_json, url);
+    var response = await sendRequest(request_headers, ?request_body_json, #post, url);
 
     if (response.status == 503) {
       Debug.print("Retry with \"x-wait-for-model\" header, due to 503 response");
       let request_headers_with_wait = Array.append(request_headers, [{ name = "x-wait-for-model"; value = "true" }]);
-      response := await sendRequest(request_headers_with_wait, request_body_json, url);
+      response := await sendRequest(request_headers_with_wait, ?request_body_json, #post, url);
     };
     
     switch (Text.decodeUtf8(response.body)) {
@@ -247,7 +253,105 @@ actor Advanced {
 
   // ==== CHALLENGE 4 ====
 
+  stable let btcHourlyCandles = Map.new<Nat64, Types.Candle>();
+
+  /**
+   * Converts a given text to a floating-point number.
+   *
+   * @param {Text} t - The text to be converted to a float.
+   * @return {async Float} - The floating-point number representation of the input text.
+   */
+  private func textToFloat(t : Text) : async Float {
+
+    var i : Float = 1;
+    var f : Float = 0;
+    var isDecimal : Bool = false;
+
+    for (c in t.chars()) {
+      if (Char.isDigit(c)) {
+        let charToNat : Nat64 = Nat64.fromNat(Nat32.toNat(Char.toNat32(c) -48));
+        let natToFloat : Float = Float.fromInt64(Int64.fromNat64(charToNat));
+        if (isDecimal) {
+          let n : Float = natToFloat / Float.pow(10, i);
+          f := f + n;
+        } else {
+          f := f * 10 + natToFloat;
+        };
+        i := i + 1;
+      } else {
+        if (Char.equal(c, '.') or Char.equal(c, ',')) {
+          f := f / Float.pow(10, i); // Force decimal
+          f := f * Float.pow(10, i); // Correction
+          isDecimal := true;
+          i := 1;
+        } else {
+          throw Error.reject("NaN");
+        };
+      };
+    };
+
+    return f;
+  };
+
+  public func getBtcHourlyCandles() : async [Types.Candle] {
+    return Map.toArrayMap<Nat64, Types.Candle, Types.Candle>(
+      btcHourlyCandles,
+      func (key : Nat64, value: Types.Candle) {
+        return ?value;
+      }
+    );
+  };
+
   // - create a "job" method (meant to be called by the Timer);
+  public func job() : async () {
+    
+    let url = "https://api.bitget.com/api/v2/spot/market/candles?symbol=BTCUSDT&granularity=1h";
+    let request_headers = [];
+
+    var response = await sendRequest(request_headers, null, #get, url);
+    
+    switch (Text.decodeUtf8(response.body)) {
+      case (?decodedText) {
+        switch (Serde.JSON.fromText(decodedText, null)) {
+          case (#ok(blob)) {
+            var response : ?Types.BitGetMarketCandlesResponse = from_candid(blob);
+            switch (response) {
+              case (?parsedResponse) {
+                let candleArray = parsedResponse.data;
+                let size = candleArray.size();
+                if (size > 1) {
+                  // Last candle is incomplete so we want the previous candle from the last candle
+                  let responseCandle = candleArray[size - 2];
+                  let timestampFloat = await textToFloat(responseCandle[0]);
+                  let timestampInt64 = Float.toInt64(timestampFloat);
+                  let timestampNat64 = Int64.toNat64(timestampInt64);
+                  let candle : Types.Candle = {
+                    timestamp = timestampNat64;
+                    open = await textToFloat(responseCandle[1]);
+                    high = await textToFloat(responseCandle[2]);
+                    low = await textToFloat(responseCandle[3]);
+                    close = await textToFloat(responseCandle[4]);
+                    volume = await textToFloat(responseCandle[5]);
+                  };
+                  Map.set(btcHourlyCandles, n64hash, timestampNat64, candle);
+                }
+              };
+              case (_) {
+                throw Error.reject("Failed to parse response: " # decodedText);
+              };
+            };
+          };
+          case (#err(error)) {
+            throw Error.reject("Failed to parse JSON: " # error);
+          };
+        };
+       };
+       case (_) { 
+        throw Error.reject("Failed to decode HTTP outcall response");
+      };
+    };
+  };
+
   // - create a "cron" job that runs "every 1h".
   // - create a "queued" job that you set to run in "1 min".
 

@@ -1,3 +1,5 @@
+import Float "mo:base/Float";
+import Nat "mo:base/Nat";
 module Types {
 
   public type Timestamp = Nat64;
@@ -66,6 +68,23 @@ module Types {
     //3. Declaring the IC management canister which we use to make the HTTPS outcall
     public type IC = actor {
         http_request : HttpRequestArgs -> async HttpResponsePayload;
+    };
+
+    // Type for challenge 4 : cron job which fetch and store BTC price every hour
+    public type Candle = {
+        timestamp : Timestamp;
+        open : Float;
+        high : Float;
+        low : Float;
+        close : Float;
+        volume : Float;
+    };
+
+    public type BitGetMarketCandlesResponse = {
+        code : Text;
+        msg : Text;
+        requestTime : Nat;
+        data : [[Text]];
     };
 
 }
