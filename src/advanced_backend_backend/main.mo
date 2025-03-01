@@ -5,7 +5,6 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Principal "mo:base/Principal";
 import Map "mo:map/Map";
-import { phash; nhash } "mo:map/Map";
 import Vector "mo:vector";
 import Result "mo:base/Result";
 import Float "mo:base/Float";
@@ -19,10 +18,11 @@ import IC_EXP "mo:base/ExperimentalInternetComputer";
 import Char "mo:base/Char";
 import Nat32 "mo:base/Nat32";
 import Int64 "mo:base/Int64";
-import Type "mo:candid/Type";
 import Types "types";
 import Other "canister:other_backend";
 import { n64hash } "mo:map/Map";
+import { setTimer; recurringTimer; cancelTimer } = "mo:base/Timer";
+import Timer "mo:base/Timer";
 
 actor Advanced {
 
@@ -255,6 +255,8 @@ actor Advanced {
 
   stable let btcHourlyCandles = Map.new<Nat64, Types.Candle>();
 
+  var timerId : ?Timer.TimerId = null;
+
   /**
    * Converts a given text to a floating-point number.
    *
@@ -303,7 +305,7 @@ actor Advanced {
   };
 
   // - create a "job" method (meant to be called by the Timer);
-  public func job() : async () {
+  private func job() : async () {
     
     let url = "https://api.bitget.com/api/v2/spot/market/candles?symbol=BTCUSDT&granularity=1h";
     let request_headers = [];
@@ -317,6 +319,7 @@ actor Advanced {
             var response : ?Types.BitGetMarketCandlesResponse = from_candid(blob);
             switch (response) {
               case (?parsedResponse) {
+                Debug.print("Got candles at : " # debug_show parsedResponse.requestTime);
                 let candleArray = parsedResponse.data;
                 let size = candleArray.size();
                 if (size > 1) {
@@ -325,15 +328,23 @@ actor Advanced {
                   let timestampFloat = await textToFloat(responseCandle[0]);
                   let timestampInt64 = Float.toInt64(timestampFloat);
                   let timestampNat64 = Int64.toNat64(timestampInt64);
-                  let candle : Types.Candle = {
-                    timestamp = timestampNat64;
-                    open = await textToFloat(responseCandle[1]);
-                    high = await textToFloat(responseCandle[2]);
-                    low = await textToFloat(responseCandle[3]);
-                    close = await textToFloat(responseCandle[4]);
-                    volume = await textToFloat(responseCandle[5]);
+                  switch (Map.get(btcHourlyCandles, n64hash, timestampNat64)) {
+                    case (?candleFound) {
+                      Debug.print("Candle " # debug_show candleFound # " is already saved");
+                    };
+                    case (_) {
+                      let candle : Types.Candle = {
+                        timestamp = timestampNat64;
+                        open = await textToFloat(responseCandle[1]);
+                        high = await textToFloat(responseCandle[2]);
+                        low = await textToFloat(responseCandle[3]);
+                        close = await textToFloat(responseCandle[4]);
+                        volume = await textToFloat(responseCandle[5]);
+                      };
+                      Map.set(btcHourlyCandles, n64hash, timestampNat64, candle);
+                      Debug.print("Saved candle " # debug_show candle);
+                    };
                   };
-                  Map.set(btcHourlyCandles, n64hash, timestampNat64, candle);
                 }
               };
               case (_) {
@@ -353,7 +364,20 @@ actor Advanced {
   };
 
   // - create a "cron" job that runs "every 1h".
+  public func cron() : async () {
+    switch (timerId) {
+      case (?id) {
+        cancelTimer(id);
+      };
+      case (_) {};
+    };
+    timerId := ?recurringTimer<system>(#seconds 3600, job);
+  };
+
   // - create a "queued" job that you set to run in "1 min".
+  public func queued() : async() {
+    ignore setTimer<system>(#seconds 60, job);
+  };
 
   // ==== CHALLENGE 5 ====
 
