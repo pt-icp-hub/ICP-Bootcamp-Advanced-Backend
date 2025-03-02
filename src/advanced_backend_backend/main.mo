@@ -189,7 +189,7 @@ shared ({ caller }) actor class Advanced() = this {
 
   public func callOutsideCanister() : async Result.Result<Text, Text> {
     try {
-      let outSideCanister = actor("bw4dl-smaaa-aaaaa-qaacq-cai"): actor { greet(name : Text) : async Text };
+      let outSideCanister = actor("kc2nt-paaaa-aaaam-qdghq-cai"): actor { greet(name : Text) : async Text };
       let response = await outSideCanister.greet("Alice");
       return #ok(response);
     } catch (error) {
