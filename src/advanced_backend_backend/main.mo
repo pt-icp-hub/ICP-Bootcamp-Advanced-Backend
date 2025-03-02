@@ -14,12 +14,12 @@ import Error "mo:base/Error";
 import Array "mo:base/Array";
 import Bool "mo:base/Bool";
 import {ic} "mo:ic";
-import IC_EXP "mo:base/ExperimentalInternetComputer";
+import IC "mo:base/ExperimentalInternetComputer";
 import Char "mo:base/Char";
 import Nat32 "mo:base/Nat32";
 import Int64 "mo:base/Int64";
 import Types "types";
-import Other "canister:other_backend";
+// import Other "canister:other_backend";
 import { n64hash } "mo:map/Map";
 import { setTimer; recurringTimer; cancelTimer } = "mo:base/Timer";
 import Timer "mo:base/Timer";
@@ -178,14 +178,14 @@ shared ({ caller }) actor class Advanced() = this {
 
   // ==== CHALLENGE 3 ====
 
-  public composite query func callOtherCanister(shouldFail : Bool) : async Result.Result<Text, Text> {
-    try {
-      let response = await Other.doNothingSpecial(shouldFail);
-      return #ok(response);
-    } catch (error) {
-      return #err("Error calling Other.doNothingSpecial: code=" # debug_show(Error.code(error)) # " message=" # Error.message(error));
-    };
-  };
+  // public composite query func callOtherCanister(shouldFail : Bool) : async Result.Result<Text, Text> {
+  //   try {
+  //     let response = await Other.doNothingSpecial(shouldFail);
+  //     return #ok(response);
+  //   } catch (error) {
+  //     return #err("Error calling Other.doNothingSpecial: code=" # debug_show(Error.code(error)) # " message=" # Error.message(error));
+  //   };
+  // };
 
   public func callOutsideCanister() : async Result.Result<Text, Text> {
     try {
@@ -207,7 +207,7 @@ shared ({ caller }) actor class Advanced() = this {
   public func callOutsideCanisterWithId(canisterId : Principal) : async Result.Result<Text, Text> {
     let functionName = "icrc1_name";
     try {
-      let encodedValue = await IC_EXP.call(canisterId, functionName, to_candid(()));
+      let encodedValue = await IC.call(canisterId, functionName, to_candid(()));
       let value : ?Text = from_candid(encodedValue);
       switch (value) {
         case (?icrc1_name) {
@@ -222,16 +222,7 @@ shared ({ caller }) actor class Advanced() = this {
     };
   };
 
-  public func callManagementCanister() : async Result.Result<{
-    controllers : [Principal];
-    status : {
-      #stopped;
-      #stopping;
-      #running;
-    };
-    memory_size : Nat;
-    cycles : Nat
-  }, Text> {
+  public func callManagementCanister() : async Result.Result<Types.CanisterStatusResult, Text> {
     try {
       let canisterInfo = await ic.canister_info({
         canister_id = Principal.fromActor(this);

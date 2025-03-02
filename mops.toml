@@ -6,7 +6,7 @@ serde = "3.2.2"
 ic = "2.0.0"
 
 [toolchain]
-pocket-ic = "8.0.0"
+pocket-ic = "4.0.0"
 
 [dev-dependencies]
 test = "2.1.0"

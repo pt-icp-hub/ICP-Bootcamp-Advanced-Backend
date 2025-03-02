@@ -88,4 +88,15 @@ module Types {
         data : [[Text]];
     };
 
+    public type CanisterStatusResult = {
+        controllers : [Principal];
+        status : {
+        #stopped;
+        #stopping;
+        #running;
+        };
+        memory_size : Nat;
+        cycles : Nat
+    };
+
 }
