@@ -1,5 +1,6 @@
 import Float "mo:base/Float";
 import Nat "mo:base/Nat";
+import Blob "mo:base/Blob";
 module Types {
 
   public type Timestamp = Nat64;
@@ -10,7 +11,7 @@ module Types {
         url : Text;
         max_response_bytes : ?Nat64;
         headers : [HttpHeader];
-        body : ?[Nat8];
+        body : ?Blob;
         method : HttpMethod;
         transform : ?TransformRawResponseFunction;
     };
@@ -29,7 +30,7 @@ module Types {
     public type HttpResponsePayload = {
         status : Nat;
         headers : [HttpHeader];
-        body : [Nat8];
+        body : Blob;
     };
 
     //2. HTTPS outcalls have an optional "transform" key. These two types help describe it.

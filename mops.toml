@@ -3,3 +3,10 @@ base = "0.13.2"
 map = "9.0.1"
 vector = "0.4.1"
 serde = "3.2.2"
+ic = "2.0.0"
+
+[toolchain]
+pocket-ic = "8.0.0"
+
+[dev-dependencies]
+test = "2.1.0"

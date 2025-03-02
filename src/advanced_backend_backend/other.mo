@@ -1,6 +1,6 @@
 import Error "mo:base/Error";
 
-actor Other {
+actor class Other() {
     
     public shared query func doNothingSpecial(shouldFail : Bool) : async Text {
         if (shouldFail) {

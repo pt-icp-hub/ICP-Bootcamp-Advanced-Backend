@@ -13,7 +13,7 @@ import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Array "mo:base/Array";
 import Bool "mo:base/Bool";
-import IC "ic:aaaaa-aa";
+import {ic} "mo:ic";
 import IC_EXP "mo:base/ExperimentalInternetComputer";
 import Char "mo:base/Char";
 import Nat32 "mo:base/Nat32";
@@ -24,17 +24,17 @@ import { n64hash } "mo:map/Map";
 import { setTimer; recurringTimer; cancelTimer } = "mo:base/Timer";
 import Timer "mo:base/Timer";
 
-actor Advanced {
+shared ({ caller }) actor class Advanced() = this {
 
   // ==== CHALLENGE 1 ====
-  stable let adminsMap = Vector.init<Principal>(1, Principal.fromText("skdcz-xid3o-nsvrx-gogyf-ix6jh-enkm6-44l25-2njsd-7d5zq-agste-jqe"));
+  stable let adminsVector = Vector.init<Principal>(1, caller);
 
   private func isAdmin(principal : Principal) : Bool {
-    return Vector.contains(adminsMap, principal, Principal.equal);
+    return Vector.contains(adminsVector, principal, Principal.equal);
   };
 
   public shared query func getAdmins() : async [Principal] {
-    return Vector.toArray(adminsMap);
+    return Vector.toArray(adminsVector);
   };
 
   public shared ({ caller }) func addAdmin(principal : Principal) : async Result.Result<Text, Text> {
@@ -47,7 +47,7 @@ actor Advanced {
       return #err("Principal " # debug_show principal # " is already an admin");
     };
 
-    Vector.add(adminsMap, principal);
+    Vector.add(adminsVector, principal);
 
     return #ok("Admin " # debug_show principal # " added");
   };
@@ -70,8 +70,8 @@ actor Advanced {
 
   public query func transform({
     context : Blob;
-    response : IC.http_request_result;
-  }) : async IC.http_request_result {
+    response : Types.HttpResponsePayload;
+  }) : async Types.HttpResponsePayload {
     {
       response with headers = [];
     };
@@ -81,9 +81,9 @@ actor Advanced {
     headers : [Types.HttpHeader],
     body_json : ?Text,
     method: Types.HttpMethod,
-    url : Text) : async IC.http_request_result {
+    url : Text) : async Types.HttpResponsePayload {
     
-    let http_request : IC.http_request_args = {
+    let http_request : Types.HttpRequestArgs = {
       url = url;
       max_response_bytes = null;
       headers = headers;
@@ -97,7 +97,7 @@ actor Advanced {
 
     Cycles.add<system>(230_850_258_000); // Necessary cycles for http outcall
 
-    return await IC.http_request(http_request);
+    return await ic.http_request(http_request);
   };
 
   public func outcall_ai_model_for_sentiment_analysis(paragraph : Text) : async Result.Result<{ paragraph : Text; result : Text }, Text> {
@@ -233,12 +233,12 @@ actor Advanced {
     cycles : Nat
   }, Text> {
     try {
-      let canisterInfo : IC.canister_info_result = await IC.canister_info({
-        canister_id = Principal.fromActor(Advanced);
+      let canisterInfo = await ic.canister_info({
+        canister_id = Principal.fromActor(this);
         num_requested_changes = ?1;
       });
-      let canisterStatus : IC.canister_status_result = await IC.canister_status({
-        canister_id = Principal.fromActor(Advanced);
+      let canisterStatus = await ic.canister_status({
+        canister_id = Principal.fromActor(this);
       });
       return #ok({
         controllers = canisterInfo.controllers;
