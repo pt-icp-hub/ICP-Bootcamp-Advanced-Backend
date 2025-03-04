@@ -12,6 +12,9 @@ Welcome to the **Internet Computer Protocol (ICP) Bootcamp - Advanced Backend**!
 
 ---
 
+## 🎥 Overview Video
+https://2ly.link/24xdr
+
 ## 🎯 Advanced Challenges
 
 Please choose 3 out of 5 that interest you most.
